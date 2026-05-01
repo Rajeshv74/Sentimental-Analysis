@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Pro | Advanced Sentiment Analysis Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ============================================================
+           AUTH PAGES — Signup & Login (separate pages, same theme)
+           ============================================================ */
+
+        /* --- Shared auth layout --- */
+        .auth-page {
+            display: none;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .auth-page.active { display: flex; }
+
+        .auth-container {
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            padding: 2.8rem 2.8rem 2.2rem;
+            animation: authCardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes authCardIn {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0)   scale(1); }
+        }
+
+        /* --- Logo --- */
+        .auth-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+        .auth-logo-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            flex-shrink: 0;
+        }
+        .auth-logo-text h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.4px;
+            line-height: 1.2;
+        }
+        .auth-logo-text span {
+            font-size: 0.75rem;
+            color: #f59e0b;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        /* --- Headings inside card --- */
+        .auth-heading {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 0.3rem;
+        }
+        .auth-subheading {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 1.8rem;
+        }
+
+        /* --- Alert banners --- */
+        .auth-alert {
+            display: none;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid transparent;
+        }
+        .auth-alert.show { display: flex; align-items: center; gap: 0.5rem; }
+        .auth-alert.success {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+        }
+        .auth-alert.error {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        /* --- Form fields --- */
+        .auth-field {
+            margin-bottom: 1.1rem;
+        }
+        .auth-field label {
+            display: block;
+            font-size: 0.825rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 0.4rem;
+            letter-spacing: 0.3px;
+        }
+        .auth-input-wrap {
+            position: relative;
+        }
+        .auth-input-wrap .field-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 0.9rem;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+        .auth-input-wrap input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.7rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s, background0.2s, box-shadow 0.2s;
+        }
+        .auth-input-wrap input::placeholder { color: #475569; }
+        .auth-input-wrap input:focus {
+            border-color: rgba(99, 102, 241, 0.6);
+            background: rgba(255, 255, 255, 0.09);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+        .auth-input-wrap input:focus + .field-icon,
+        .auth-input-wrap input:focus ~ .field-icon { color: #818cf8; }
+        .auth-input-wrap input.field-error {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+        /* icon is first child, so we need a different selector */
+        .auth-input-wrap .field-icon { z-index: 1; }
+        .auth-input-wrap input:focus { }
+
+        /* toggle password eye */
+        .toggle-pw-btn {
+            position: absolute;
+            right: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+        .toggle-pw-btn:hover { color: #94a3b8; }
+
+        /* field error text */
+        .field-err-msg {
+            display: none;
+            font-size: 0.78rem;
+            color: #f87171;
+            margin-top: 0.35rem;
+            padding-left: 0.2rem;
+        }
+        .field-err-msg.show { display: block; }
+
+        /* --- Password strength --- */
+        .pw-strength-wrap { margin-top: 0.5rem; }
+        .pw-strength-bars {
+            display: flex;
+            gap: 4px;
+            height: 3px;
+        }
+        .pw-bar {
+            flex: 1;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.1);
+            transition: background 0.25s;
+        }
+        .pw-bar.weak   { background: #ef4444; }
+        .pw-bar.fair   { background: #f59e0b; }
+        .pw-bar.strong { background: #10b981; }
+        .pw-strength-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.3rem;
+        }
+
+        /* --- Password requirements checklist --- */
+        .pw-reqs {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 0.75rem 0.9rem;
+            margin-top: 0.6rem;
+        }
+        .pw-req-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 0.3rem;
+            transition: color 0.2s;
+        }
+        .pw-req-item:last-child { margin-bottom: 0; }
+        .pw-req-item .req-icon { font-size: 0.7rem; transition: color 0.2s; }
+        .pw-req-item.met { color: #6ee7b7; }
+        .pw-req-item.met .req-icon { color: #10b981; }
+
+        /* --- Submit button --- */
+        .auth-btn {
+            width: 100%;
+            padding: 0.85rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            margin-top: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.35);
+        }
+        .auth-btn:hover {
+            opacity: 0.93;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 28px rgba(102, 126, 234, 0.45);
+        }
+        .auth-btn:active { transform: scale(0.98); }
+
+        /* --- Divider --- */
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1.2rem 0 1rem;
+        }
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+        }
+        .auth-divider span {
+            font-size: 0.8rem;
+            color: #475569;
+        }
+
+        /* --- Switch link at bottom --- */
+        .auth-switch {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        .auth-switch a {
+            color: #818cf8;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .auth-switch a:hover { color: #a5b4fc; text-decoration: underline; }
+
+        /* --- Success screen after signup --- */
+        .signup-success-screen {
+            display: none;
+            text-align: center;
+            padding: 0.5rem 0;
+        }
+        .signup-success-screen.show { display: block; }
+        .success-anim-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 2px solid rgba(16, 185, 129, 0.4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.2rem;
+            font-size: 1.6rem;
+            color: #10b981;
+            animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to   { transform: scale(1);   opacity: 1; }
+        }
+        .signup-success-screen h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 0.5rem;
+        }
+        .signup-success-screen p {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background (shared across all pages) -->
+    <div class="animated-bg">
+        <div class="bg-shape shape-1"></div>
+        <div class="bg-shape shape-2"></div>
+        <div class="bg-shape shape-3"></div>
+        <div class="bg-shape shape-4"></div>
+    </div>
+
+    <!-- =============================================
+         SIGNUP PAGE
+         ============================================= -->
+    <div id="signupPage" class="auth-page active">
+        <div class="auth-container">
+            <div class="auth-card">
+
+                <!-- Logo -->
+                <div class="auth-logo">
+                    <div class="auth-logo-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="auth-logo-text">
+                        <h1>Sentiment Pro</h1>
+                        <span>Premium</span>
+                    </div>
+                </div>
+
+                <h2 class="auth-heading">Create your account</h2>
+                <p class="auth-subheading">Join Sentiment Pro and start analyzing in seconds</p>
+
+                <!-- Alert -->
+                <div id="signupAlert" class="auth-alert"></div>
+
+                <!-- Signup form -->
+                <div id="signupFormWrap">
+
+                    <div class="auth-field">
+                        <label for="su-name">Full name</label>
+                        <div class="auth-input-wrap">
+                            <i class="fas fa-user field-icon"></i>
+                            <input type="text" id="su-name" placeholder="Jane Doe"
+                                   oninput="clearFieldErr('su-name','su-name-err')">
+                            <div class="field-err-msg" id="su-name-err">Please enter your full name</div>
+                        </div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="su-email">Email address</label>
+                        <div class="auth-input-wrap">
+                            <i class="fas fa-envelope field-icon"></i>
+                            <input type="email" id="su-email" placeholder="jane@example.com"
+                                   oninput="clearFieldErr('su-email','su-email-err')">
+                            <div class="field-err-msg" id="su-email-err">Please enter a valid email</div>
+                        </div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="su-username">Username</label>
+                        <div class="auth-input-wrap">
+                            <i class="fas fa-at field-icon"></i>
+                            <input type="text" id="su-username" placeholder="jane_doe"
+                                   oninput="clearFieldErr('su-username','su-username-err')">
+                            <div class="field-err-msg" id="su-username-err">3–20 characters: letters, numbers, underscores only</div>
+                        </div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="su-pw">Password</label>
+                        <div class="auth-input-wrap">
+                            <i class="fas fa-lock field-icon"></i>
+                            <input type="password" id="su-pw" placeholder="Create a strong password"
+                                   oninput="onSignupPwInput()">
+                            <button class="toggle-pw-btn" type="button"
+                                    onclick="togglePw('su-pw', this)" title="Show/hide password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <!-- Strength bar -->
+                        <div class="pw-strength-wrap">
+                            <div class="pw-strength-bars">
+                                <div class="pw-bar" id="pb1"></div>
+                                <div class="pw-bar" id="pb2"></div>
+                                <div class="pw-bar" id="pb3"></div>
+                                <div class="pw-bar" id="pb4"></div>
+                            </div>
+                            <div class="pw-strength-label" id="pw-strength-label">Enter a password</div>
+                        </div>
+                        <!-- Requirements -->
+                        <div class="pw-reqs">
+                            <div class="pw-req-item" id="req-len">
+                                <i class="fas fa-circle req-icon"></i> At least 8 characters
+                            </div>
+                            <div class="pw-req-item" id="req-upper">
+                                <i class="fas fa-circle req-icon"></i> One uppercase letter (A–Z)
+                            </div>
+                            <div class="pw-req-item" id="req-num">
+                                <i class="fas fa-circle req-icon"></i> One number (0–9)
+                            </div>
+                            <div class="pw-req-item" id="req-special">
+                                <i class="fas fa-circle req-icon"></i> One special character (!@#$…)
+                            </div>
+                        </div>
+                        <div class="field-err-msg" id="su-pw-err">Password doesn't meet all requirements</div>
+                    </div>
+
+                    <div class="auth-field">
+                        <label for="su-confirm">Confirm password</label>
+                        <div class="auth-input-wrap">
+                            <i class="fas fa-lock field-icon"></i>
+                            <input type="password" id="su-confirm" placeholder="Repeat your password"
+                                   oninput="clearFieldErr('su-confirm','su-confirm-err')">
+                            <button class="toggle-pw-btn" type="button"
+                                    onclick="togglePw('su-confirm', this)" title="Show/hide password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <div class="field-err-msg" id="su-confirm-err">Passwords do not match</div>
+                        </div>
+                    </div>
+
+                    <button class="auth-btn" onclick="doSignup()">
+                        <i class="fas fa-user-plus"></i>
+                        Create Account
+                    </button>
+                </div>
+
+                <!-- Success screen shown after signup -->
+                <div class="signup-success-screen" id="signupSuccess">
+                    <div class="success-anim-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h3>Account Created!</h3>
+                    <p>Your Sentiment Pro account is ready.<br>Sign in to start analyzing.</p>
+                    <button class="auth-btn" onclick="showPage('login')">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Go to Sign In
+                    </button>
+                </div>
+
+                <div class="auth-divider"><span>or</span></div>
+                <div class="auth-switch">
+                    Already have an account?
+                    <a onclick="showPage('login')">Sign in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         LOGIN PAGE
+         ============================================= -->
+    <div id="loginPage" class="auth-page">
+        <div class="auth-container">
+            <div class="auth-card">
+
+                <!-- Logo -->
+                <div class="auth-logo">
+                    <div class="auth-logo-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="auth-logo-text">
+                        <h1>Sentiment Pro</h1>
+                        <span>Premium</span>
+                    </div>
+                </div>
+
+                <h2 class="auth-heading">Welcome back</h2>
+                <p class="auth-subheading">Sign in to your account to continue</p>
+
+                <!-- Alert -->
+                <div id="loginAlert" class="auth-alert"></div>
+
+                <div class="auth-field">
+                    <label for="li-identifier">Username or email</label>
+                    <div class="auth-input-wrap">
+                        <i class="fas fa-user field-icon"></i>
+                        <input type="text" id="li-identifier" placeholder="jane_doe or jane@example.com"
+                               oninput="clearFieldErr('li-identifier','li-id-err')"
+                               onkeydown="if(event.key==='Enter') doLogin()">
+                        <div class="field-err-msg" id="li-id-err">Please enter your username or email</div>
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label for="li-pw">Password</label>
+                    <div class="auth-input-wrap">
+                        <i class="fas fa-lock field-icon"></i>
+                        <input type="password" id="li-pw" placeholder="Your password"
+                               oninput="clearFieldErr('li-pw','li-pw-err')"
+                               onkeydown="if(event.key==='Enter') doLogin()">
+                        <button class="toggle-pw-btn" type="button"
+                                onclick="togglePw('li-pw', this)" title="Show/hide password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <div class="field-err-msg" id="li-pw-err">Please enter your password</div>
+                    </div>
+                </div>
+
+                <button class="auth-btn" onclick="doLogin()">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In to Dashboard
+                </button>
+
+                <div class="auth-divider"><span>or</span></div>
+                <div class="auth-switch">
+                    Don't have an account?
+                    <a onclick="showPage('signup')">Create one free</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         MAIN DASHBOARD
+         ============================================= -->
+    <div id="dashboard" class="dashboard" style="display: none;">
+        <!-- Header -->
+        <header class="dashboard-header glassmorphism">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>Sentiment Pro</h1>
+                        <span>Premium</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <nav class="nav-menu">
+                    <a href="#" class="nav-item active" data-section="dashboard-main">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="nav-item" data-section="analysis">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analysis</span>
+                    </a>
+                    <a href="#" class="nav-item" data-section="history">
+                        <i class="fas fa-history"></i>
+                        <span>History</span>
+                    </a>
+                </nav>
+            </div>
+            
+            <div class="header-right">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span id="userName" class="user-name">Admin</span>
+                        <span class="user-status">Premium Member</span>
+                    </div>
+                    <div class="user-dropdown">
+                        <button id="logoutBtn" class="btn-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+                <div class="welcome-card glassmorphism">
+                    <div class="welcome-content">
+                        <h2>Welcome back, <span id="displayName" class="gradient-text">User</span>! <span class="welcome-emoji">👋</span></h2>
+                        <p>Ready to analyze sentiments across multiple modalities? Choose your preferred analysis method below.</p>
+                    </div>
+                    <div class="welcome-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-analytics"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number">24</span>
+                                <span class="stat-label">Analyses Today</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number">98%</span>
+                                <span class="stat-label">Accuracy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feature Cards -->
+            <section class="features-section">
+                <div class="section-header">
+                    <h3>Sentiment Analysis Tools</h3>
+                    <p>Choose your preferred method for comprehensive sentiment analysis</p>
+                </div>
+                
+                <div class="features-grid">
+                    <div class="feature-card glassmorphism" data-feature="text">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-keyboard"></i></div>
+                            <div class="card-badge">Most Accurate</div>
+                        </div>
+                        <div class="card-content">
+                            <h3>Text Sentiment Analysis</h3>
+                            <p>Advanced NLP analysis of written text to detect sentiments, emotional patterns, and subtle linguistic cues.</p>
+                            <div class="card-features">
+                                <span><i class="fas fa-check"></i> Sentiment Detection</span>
+                                <span><i class="fas fa-check"></i> Sarcasm Analysis</span>
+                                <span><i class="fas fa-check"></i> Emotion Mapping</span>
+                                <span><i class="fas fa-check"></i> Context Awareness</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="card-btn"><span>Start Analysis</span><i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="feature-card glassmorphism" data-feature="voice">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-microphone"></i></div>
+                            <div class="card-badge">Real-time</div>
+                        </div>
+                        <div class="card-content">
+                            <h3>Voice Sentiment Analysis</h3>
+                            <p>Capture and analyze vocal patterns, tone variations, and speech characteristics to detect sentiment states.</p>
+                            <div class="card-features">
+                                <span><i class="fas fa-check"></i> Voice Recording</span>
+                                <span><i class="fas fa-check"></i> Tone Analysis</span>
+                                <span><i class="fas fa-check"></i> Sentiment Detection</span>
+                                <span><i class="fas fa-check"></i> Audio Playback</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="card-btn"><span>Start Recording</span><i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="feature-card glassmorphism" data-feature="face">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-eye"></i></div>
+                            <div class="card-badge">AI Powered</div>
+                        </div>
+                        <div class="card-content">
+                            <h3>Facial Sentiment Detection</h3>
+                            <p>Advanced facial expression analysis using computer vision to detect and interpret emotional micro-expressions.</p>
+                            <div class="card-features">
+                                <span><i class="fas fa-check"></i> Real-time Camera</span>
+                                <span><i class="fas fa-check"></i> Expression Analysis</span>
+                                <span><i class="fas fa-check"></i> Sentiment Mapping</span>
+                                <span><i class="fas fa-check"></i> Micro-expression Detection</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="card-btn"><span>Start Camera</span><i class="fas fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Activity -->
+            <section class="activity-section">
+                <div class="section-header">
+                    <h3>Recent Analysis</h3>
+                    <p>Your latest sentiment intelligence insights</p>
+                </div>
+                <div class="activity-grid">
+                    <div class="activity-card glassmorphism">
+                        <div class="activity-icon"><i class="fas fa-keyboard"></i></div>
+                        <div class="activity-content">
+                            <h4>Text Analysis</h4>
+                            <p>"I'm feeling really excited about the new project!"</p>
+                            <div class="activity-meta">
+                                <span class="sentiment-tag positive">Positive</span>
+                                <span class="time">2 hours ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-card glassmorphism">
+                        <div class="activity-icon"><i class="fas fa-microphone"></i></div>
+                        <div class="activity-content">
+                            <h4>Voice Analysis</h4>
+                            <p>28 second recording</p>
+                            <div class="activity-meta">
+                                <span class="sentiment-tag neutral">Neutral</span>
+                                <span class="time">5 hours ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-card glassmorphism">
+                        <div class="activity-icon"><i class="fas fa-eye"></i></div>
+                        <div class="activity-content">
+                            <h4>Face Analysis</h4>
+                            <p>Facial expression analysis</p>
+                            <div class="activity-meta">
+                                <span class="sentiment-tag positive">Positive</span>
+                                <span class="time">1 day ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Analysis Sections -->
+        <div id="analysisSections" class="analysis-sections">
+            <!-- Text Analysis Section -->
+            <div id="textSection" class="analysis-section" style="display: block;">
+                <div class="section-header glassmorphism">
+                    <button class="back-btn" data-back="text">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Dashboard
+                    </button>
+                    <div class="section-title">
+                        <div class="title-icon"><i class="fas fa-keyboard"></i></div>
+                        <h2>Text Sentiment Analysis</h2>
+                    </div>
+                    <div class="section-actions">
+                        <button class="action-btn" onclick="showAnalysisSection('history')">
+                            <i class="fas fa-history"></i> History
+                        </button>
+                    </div>
+                </div>
+                <div class="analysis-content">
+                    <div class="input-card glassmorphism">
+                        <div class="input-header">
+                            <h3>Enter Your Text</h3>
+                            <p>Type or paste your text below for sentiment analysis</p>
+                        </div>
+                        <div class="input-group">
+                            <textarea id="textInput" placeholder="Start typing your thoughts, feelings, or any text you'd like to analyze for sentiment..."></textarea>
+                            <div class="input-footer">
+                                <div class="char-count"><span id="charCount">0</span> characters</div>
+                                <button id="analyzeText" class="btn-primary" onclick="analyzeText()">
+                                    <i class="fas fa-chart-line"></i>
+                                    Analyze Sentiment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="textStatus" class="status-card"></div>
+                    <div id="textResult" class="result-card"></div>
+                </div>
+            </div>
+
+            <!-- Voice Analysis Section -->
+            <div id="voiceSection" class="analysis-section" style="display: none;">
+                <div class="section-header glassmorphism">
+                    <button class="back-btn" data-back="voice">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Dashboard
+                    </button>
+                    <div class="section-title">
+                        <div class="title-icon"><i class="fas fa-microphone"></i></div>
+                        <h2>Voice Sentiment Analysis</h2>
+                    </div>
+                    <div class="section-actions">
+                        <button class="action-btn" onclick="showAnalysisSection('history')">
+                            <i class="fas fa-history"></i> History
+                        </button>
+                    </div>
+                </div>
+                <div class="analysis-content">
+                    <div class="voice-card glassmorphism">
+                        <div class="voice-visualizer">
+                            <div class="visualizer-bars">
+                                <div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div>
+                                <div class="bar"></div><div class="bar"></div>
+                            </div>
+                            <div class="voice-controls">
+                                <button id="startRecording" class="btn-record">
+                                    <i class="fas fa-microphone"></i> Start Recording
+                                </button>
+                                <button id="stopRecording" class="btn-stop" disabled>
+                                    <i class="fas fa-stop"></i> Stop Recording
+                                </button>
+                            </div>
+                        </div>
+                        <div class="recording-info">
+                            <div class="info-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Duration: <span id="recordingTime">0s</span></span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-waveform"></i>
+                                <span>Status: <span id="recordingStatus">Ready</span></span>
+                            </div>
+                        </div>
+                        <div id="audioPlayback" class="audio-playback" style="display: none;">
+                            <div class="playback-header">
+                                <i class="fas fa-play-circle"></i>
+                                <h4>Your Recorded Audio</h4>
+                            </div>
+                            <audio id="recordedAudio" controls style="width: 100%; margin-top: 10px;"></audio>
+                            <p class="playback-note">Listen to your recording before analysis</p>
+                        </div>
+                    </div>
+                    <div id="voiceStatus" class="status-card"></div>
+                    <div id="voiceResult" class="result-card"></div>
+                </div>
+            </div>
+
+            <!-- Face Analysis Section -->
+            <div id="faceSection" class="analysis-section" style="display: none;">
+                <div class="section-header glassmorphism">
+                    <button class="back-btn" data-back="face">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Dashboard
+                    </button>
+                    <div class="section-title">
+                        <div class="title-icon"><i class="fas fa-eye"></i></div>
+                        <h2>Facial Sentiment Detection</h2>
+                    </div>
+                    <div class="section-actions">
+                        <button class="action-btn" onclick="showAnalysisSection('history')">
+                            <i class="fas fa-camera"></i> History
+                        </button>
+                    </div>
+                </div>
+                <div class="analysis-content">
+                    <div class="camera-card glassmorphism">
+                        <div class="camera-container">
+                            <div class="camera-frame">
+                                <video id="video" autoplay playsinline></video>
+                                <canvas id="canvas" style="display:none;"></canvas>
+                                <div class="camera-overlay">
+                                    <div class="face-guide"></div>
+                                    <div class="camera-instruction">
+                                        <i class="fas fa-user"></i>
+                                        <p>Position your face within the frame</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="camera-controls">
+                            <button id="startCamera" class="btn-primary">
+                                <i class="fas fa-camera"></i> Start Camera
+                            </button>
+                            <button id="stopCamera" class="btn-secondary" disabled>
+                                <i class="fas fa-stop"></i> Stop Camera
+                            </button>
+                            <button id="captureFace" class="btn-primary" disabled>
+                                <i class="fas fa-sync-alt"></i> Analyze Sentiment
+                            </button>
+                        </div>
+                    </div>
+                    <div id="faceStatus" class="status-card"></div>
+                    <div id="faceResult" class="result-card"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div id="historySection" class="history-section" style="display: none;">
+            <div class="section-header glassmorphism">
+                <button class="back-btn" data-back="history">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </button>
+                <div class="section-title">
+                    <div class="title-icon"><i class="fas fa-history"></i></div>
+                    <h2>Analysis History</h2>
+                </div>
+                <div class="section-actions">
+                    <button id="clearHistory" class="action-btn">
+                        <i class="fas fa-trash"></i> Clear All
+                    </button>
+                </div>
+            </div>
+            <div class="history-content">
+                <div class="history-filters">
+                    <div class="filter-group">
+                        <button class="filter-btn active" data-filter="all">
+                            <i class="fas fa-layer-group"></i> All Analyses
+                        </button>
+                        <button class="filter-btn" data-filter="text">
+                            <i class="fas fa-keyboard"></i> Text
+                        </button>
+                        <button class="filter-btn" data-filter="voice">
+                            <i class="fas fa-microphone"></i> Voice
+                        </button>
+                        <button class="filter-btn" data-filter="face">
+                            <i class="fas fa-eye"></i> Face
+                        </button>
+                    </div>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="historySearch" placeholder="Search history...">
+                    </div>
+                </div>
+                <div class="history-stats">
+                    <div class="stat-card glassmorphism">
+                        <div class="stat-icon"><i class="fas fa-keyboard"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="textCount">0</span>
+                            <span class="stat-label">Text Analyses</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glassmorphism">
+                        <div class="stat-icon"><i class="fas fa-microphone"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="voiceCount">0</span>
+                            <span class="stat-label">Voice Analyses</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glassmorphism">
+                        <div class="stat-icon"><i class="fas fa-eye"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="faceCount">0</span>
+                            <span class="stat-label">Face Analyses</span>
+                        </div>
+                    </div>
+                    <div class="stat-card glassmorphism">
+                        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="stat-info">
+                            <span class="stat-number" id="totalCount">0</span>
+                            <span class="stat-label">Total Analyses</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="historyList" class="history-list"></div>
+                <div id="emptyHistory" class="empty-state glassmorphism">
+                    <div class="empty-icon"><i class="fas fa-history"></i></div>
+                    <h3>No Analysis History Yet</h3>
+                    <p>Your analysis history will appear here after you perform sentiment analyses.</p>
+                    <button class="btn-primary" onclick="hideAnalysisSection('history')">
+                        <i class="fas fa-rocket"></i> Start Analyzing
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Response Section -->
+        <div id="aiResponseSection" class="ai-response-section" style="display: none;">
+            <div class="ai-response-card glassmorphism">
+                <div class="ai-header">
+                    <div class="ai-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="ai-title">
+                        <h3>Sentiment Analysis Assistant</h3>
+                        <span>Powered by Gemini AI</span>
+                    </div>
+                </div>
+                <div id="aiResponse" class="ai-response-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <p>Processing with AI...</p>
+    </div>
+
+    <!-- =============================================
+         AUTH JAVASCRIPT
+         (Signup, Login, Logout logic)
+         ============================================= -->
+    <script>
+        /* ---- Storage helpers ---- */
+        function getUsers() {
+            try { return JSON.parse(localStorage.getItem('sp_users') || '[]'); }
+            catch { return []; }
+        }
+        function saveUsers(u) { localStorage.setItem('sp_users', JSON.stringify(u)); }
+
+        /* ---- Page switching ---- */
+        function showPage(page) {
+            document.getElementById('signupPage').classList.remove('active');
+            document.getElementById('loginPage').classList.remove('active');
+            document.getElementById('dashboard').style.display = 'none';
+
+            if (page === 'signup') {
+                document.getElementById('signupPage').classList.add('active');
+            } else if (page === 'login') {
+                document.getElementById('loginPage').classList.add('active');
+                clearAlert('loginAlert');
+            } else if (page === 'dashboard') {
+                document.getElementById('dashboard').style.display = 'block';
+            }
+        }
+
+        /* ---- Alert helpers ---- */
+        function showAlert(id, msg, type) {
+            const el = document.getElementById(id);
+            el.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${msg}`;
+            el.className = `auth-alert ${type} show`;
+        }
+        function clearAlert(id) {
+            const el = document.getElementById(id);
+            el.className = 'auth-alert';
+            el.innerHTML = '';
+        }
+
+        /* ---- Field error helpers ---- */
+        function clearFieldErr(inputId, errId) {
+            document.getElementById(inputId).classList.remove('field-error');
+            document.getElementById(errId).classList.remove('show');
+            clearAlert('signupAlert');
+            clearAlert('loginAlert');
+        }
+        function setFieldErr(inputId, errId) {
+            document.getElementById(inputId).classList.add('field-error');
+            document.getElementById(errId).classList.add('show');
+        }
+
+        /* ---- Toggle password visibility ---- */
+        function togglePw(inputId, btn) {
+            const inp = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                inp.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        /* ---- Password strength ---- */
+        function pwStrength(pw) {
+            let s = 0;
+            if (pw.length >= 8) s++;
+            if (/[A-Z]/.test(pw)) s++;
+            if (/[0-9]/.test(pw)) s++;
+            if (/[^A-Za-z0-9]/.test(pw)) s++;
+            return s;
+        }
+
+        function onSignupPwInput() {
+            const pw = document.getElementById('su-pw').value;
+            const reqs = {
+                'req-len':     pw.length >= 8,
+                'req-upper':   /[A-Z]/.test(pw),
+                'req-num':     /[0-9]/.test(pw),
+                'req-special': /[^A-Za-z0-9]/.test(pw)
+            };
+            Object.entries(reqs).forEach(([id, met]) => {
+                const el = document.getElementById(id);
+                el.classList.toggle('met', met);
+                el.querySelector('.req-icon').className = met ? 'fas fa-check-circle req-icon' : 'fas fa-circle req-icon';
+            });
+
+            const s = pwStrength(pw);
+            const barClass = ['', 'weak', 'weak', 'fair', 'strong'];
+            const labels   = ['Enter a password', 'Weak', 'Weak', 'Fair', 'Strong'];
+            ['pb1','pb2','pb3','pb4'].forEach((id, i) => {
+                const el = document.getElementById(id);
+                el.className = 'pw-bar';
+                if (pw.length > 0 && i < s) el.classList.add(barClass[s]);
+            });
+            document.getElementById('pw-strength-label').textContent = pw.length ? labels[s] : 'Enter a password';
+
+            clearFieldErr('su-pw', 'su-pw-err');
+        }
+
+        /* ---- Signup ---- */
+        function doSignup() {
+            const name     = document.getElementById('su-name').value.trim();
+            const email    = document.getElementById('su-email').value.trim();
+            const username = document.getElementById('su-username').value.trim();
+            const pw       = document.getElementById('su-pw').value;
+            const confirm  = document.getElementById('su-confirm').value;
+            let valid = true;
+
+            if (!name) { setFieldErr('su-name', 'su-name-err'); valid = false; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setFieldErr('su-email', 'su-email-err'); valid = false; }
+            if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) { setFieldErr('su-username', 'su-username-err'); valid = false; }
+            if (pwStrength(pw) < 4) { setFieldErr('su-pw', 'su-pw-err'); valid = false; }
+            if (pw !== confirm) { setFieldErr('su-confirm', 'su-confirm-err'); valid = false; }
+            if (!valid) return;
+
+            const users = getUsers();
+            if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+                showAlert('signupAlert', 'Username already taken. Please choose another.', 'error'); return;
+            }
+            if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+                showAlert('signupAlert', 'An account with this email already exists.', 'error'); return;
+            }
+
+            users.push({ name, email, username, pw });
+            saveUsers(users);
+
+            // Hide form, show success screen
+            document.getElementById('signupFormWrap').style.display = 'none';
+            document.getElementById('signupSuccess').classList.add('show');
+        }
+
+        /* ---- Login ---- */
+        function doLogin() {
+            const id = document.getElementById('li-identifier').value.trim();
+            const pw = document.getElementById('li-pw').value;
+            let valid = true;
+
+            if (!id) { setFieldErr('li-identifier', 'li-id-err'); valid = false; }
+            if (!pw) { setFieldErr('li-pw', 'li-pw-err'); valid = false; }
+            if (!valid) return;
+
+            const users = getUsers();
+            const user  = users.find(u =>
+                (u.username.toLowerCase() === id.toLowerCase() ||
+                 u.email.toLowerCase()    === id.toLowerCase()) &&
+                u.pw === pw
+            );
+
+            if (!user) {
+                showAlert('loginAlert', 'Incorrect username/email or password. Please try again.', 'error');
+                return;
+            }
+
+            const currentUser = { username: user.username, name: user.name, email: user.email };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+            // Update dashboard greeting
+            document.getElementById('userName').textContent    = user.name;
+            document.getElementById('displayName').textContent = user.name;
+
+            showAlert('loginAlert', `Welcome back, ${user.name}! Redirecting…`, 'success');
+            setTimeout(() => {
+                showPage('dashboard');
+                if (typeof loadHistory === 'function') loadHistory();
+                if (typeof updateHistoryStats === 'function') updateHistoryStats();
+            }, 900);
+        }
+
+        /* ---- Logout (called by script.js logoutBtn listener) ---- */
+        function logoutToLogin() {
+            localStorage.removeItem('currentUser');
+            // Reset signup form in case user revisits
+            document.getElementById('signupFormWrap').style.display = 'block';
+            document.getElementById('signupSuccess').classList.remove('show');
+            document.getElementById('li-identifier').value = '';
+            document.getElementById('li-pw').value = '';
+            showPage('login');
+        }
+
+        /* ---- Init: check if already logged in ---- */
+        (function init() {
+            const saved = localStorage.getItem('currentUser');
+            if (saved) {
+                const u = JSON.parse(saved);
+                document.getElementById('userName').textContent    = u.name;
+                document.getElementById('displayName').textContent = u.name;
+                showPage('dashboard');
+            } else {
+                showPage('signup');
+            }
+        })();
+    </script>
+
+    <!-- Main app logic -->
+    <script src="script.js"></script>
+
+    <!-- Patch script.js logout to use our logoutToLogin() -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                // Override: remove old listener by cloning, then add ours
+                const newBtn = logoutBtn.cloneNode(true);
+                logoutBtn.parentNode.replaceChild(newBtn, logoutBtn);
+                newBtn.addEventListener('click', function () {
+                    logoutToLogin();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
