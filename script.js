@@ -855,22 +855,19 @@ async function startRecording() {
         };
         
         mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const blobType = audioChunks[0]?.type || 'audio/webm';
+            const audioBlob = new Blob(audioChunks, { type: blobType });
             const audioUrl = URL.createObjectURL(audioBlob);
             recordedAudio.src = audioUrl;
-            
-            // Convert audio to base64 for API call
-            const reader = new FileReader();
-            reader.readAsDataURL(audioBlob);
-            reader.onloadend = async () => {
-                const base64Audio = reader.result.split(',')[1];
-                
-                // Show audio playback
-                audioPlayback.style.display = 'block';
-                
-                // Process audio with backend
-                await processAudio(base64Audio, recordingSeconds);
-            };
+
+            // Convert audio to WAV base64 for API call
+            const base64Audio = await convertAudioBlobToWavBase64(audioBlob);
+
+            // Show audio playback
+            audioPlayback.style.display = 'block';
+
+            // Process audio with backend
+            await processAudio(base64Audio, recordingSeconds);
         };
         
         mediaRecorder.start();
@@ -919,6 +916,87 @@ function resetRecordingState() {
         document.querySelector('.voice-visualizer').classList.remove('recording-active');
     }
     isRecording = false;
+}
+
+async function convertAudioBlobToWavBase64(blob) {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    const wavBuffer = encodeWAV(audioBuffer);
+    return bufferToBase64(wavBuffer);
+}
+
+function encodeWAV(audioBuffer) {
+    const numChannels = audioBuffer.numberOfChannels;
+    const sampleRate = audioBuffer.sampleRate;
+    const samples = interleave(audioBuffer);
+    const buffer = new ArrayBuffer(44 + samples.length * 2);
+    const view = new DataView(buffer);
+
+    writeString(view, 0, 'RIFF');
+    view.setUint32(4, 36 + samples.length * 2, true);
+    writeString(view, 8, 'WAVE');
+    writeString(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * numChannels * 2, true);
+    view.setUint16(32, numChannels * 2, true);
+    view.setUint16(34, 16, true);
+    writeString(view, 36, 'data');
+    view.setUint32(40, samples.length * 2, true);
+
+    floatTo16BitPCM(view, 44, samples);
+    return view;
+}
+
+function interleave(audioBuffer) {
+    const channels = [];
+    for (let i = 0; i < audioBuffer.numberOfChannels; i += 1) {
+        channels.push(audioBuffer.getChannelData(i));
+    }
+
+    if (channels.length === 1) {
+        return channels[0];
+    }
+
+    const length = channels[0].length + channels[1].length;
+    const result = new Float32Array(length);
+    let offset = 0;
+
+    for (let i = 0; i < channels[0].length; i += 1) {
+        result[offset++] = channels[0][i];
+        result[offset++] = channels[1][i];
+    }
+
+    return result;
+}
+
+function floatTo16BitPCM(output, offset, input) {
+    for (let i = 0; i < input.length; i += 1, offset += 2) {
+        let s = Math.max(-1, Math.min(1, input[i]));
+        output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    }
+}
+
+function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i += 1) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+    }
+}
+
+function bufferToBase64(view) {
+    const bytes = new Uint8Array(view.buffer);
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
 }
 
 function startRecordingTimer() {
